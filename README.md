@@ -1,8 +1,8 @@
 # Red-team-cheatsheet
 
 # Summary
-* [Domain Enumeration](#Domain Enumeration)
-    * [Powerview General](#Powerview General)
+* [Domain Enumeration](#Domain-Enumeration)
+    * [Powerview General](#Powerview-General)
     
 # Domain Enumeration
 ## Powerview General
