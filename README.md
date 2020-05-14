@@ -15,6 +15,7 @@
    * [Mimikatz](#Mimikatz) 
 * [Domain Persistence](#Domain-Persistence)
    * [Golden Ticket](#Golden-Ticket) 
+   * [Silver Ticket](#Silver-Ticket)
 
 
 # General
