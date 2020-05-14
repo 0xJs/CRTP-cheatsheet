@@ -13,7 +13,7 @@
 Get-NetDomain
 ```
 
-### Get object of another domain
+#### Get object of another domain
 ```
 Get-NetDomain -Domain <domainname>
 Get-NetDomain -Domain moneycorp.local
