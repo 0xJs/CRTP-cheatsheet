@@ -8,7 +8,7 @@
 . C:\ad\tools\PowerView.ps1
 ```
 
-### Get current domain
+#### Get current domain
 ```
 Get-NetDomain
 ```
