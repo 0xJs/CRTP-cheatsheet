@@ -4,7 +4,9 @@
 
 ## Domain Enumeration
 ### Powerview General
-```. C:\ad\tools\PowerView.ps1```
+```
+. C:\ad\tools\PowerView.ps1
+```
 
 #### Get current domain
 ```Get-NetDomain```
