@@ -1,19 +1,19 @@
 # Red-team-cheatsheet
 
-## Summary
+# Summary
 
-## Domain Enumeration
-### Powerview General
+# Domain Enumeration
+## Powerview General
 ```
 . C:\ad\tools\PowerView.ps1
 ```
 
-#### Get current domain
+### Get current domain
 ```
 Get-NetDomain
 ```
 
-#### Get object of another domain
+### Get object of another domain
 ```
 Get-NetDomain -Domain <domainname>
 Get-NetDomain -Domain moneycorp.local
