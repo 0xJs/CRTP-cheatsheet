@@ -489,6 +489,7 @@ Get-wmiobject -Class win32_operatingsystem -ComputerName dcorp-dc.dollarcorp.mon
 ```
 
 ## Silver ticket
+Interesting read: https://adsecurity.org/?p=2011
 #### Make silver ticket for CIFS
 Use the hash of the local computer
 ```
