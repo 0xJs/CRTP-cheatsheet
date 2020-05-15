@@ -9,7 +9,7 @@
     * [Powerview GPO](#Powerview-GPO)
     * [Powerview ACL](#Powerview-ACL)
     * [Powerview Domain Trust](#Powerview-Domain-Trust)
-    * [Powerview Misc](#Powerview-Misc) 
+    * [Misc](#misc) 
 * [Local privilege escalation](#Local-privilege-escalation)
 * [Lateral Movement](#Lateral-Movement)
    * [Mimikatz](#Mimikatz) 
