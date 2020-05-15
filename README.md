@@ -20,7 +20,7 @@
 
 
 # General
-#### Check for admin access of a machine
+#### Check for admin access on a machine
 ```
 ls \\computername\c$
 ```
