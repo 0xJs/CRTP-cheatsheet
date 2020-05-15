@@ -24,7 +24,8 @@
       * [DCsync](#DCsync)
       * [SecurityDescriptor WMI](#SecurityDescriptor-WMI)
       * [SecurityDescriptor - Powershell Remoting](#SecurityDescriptor---Powershell-Remoting)
-      * [SecurityDescriptor - Remote Registry](#SecurityDescriptor---RemoteRegistry)
+      * [SecurityDescriptor - Remote Registry](#SecurityDescriptor---Remote-Registry)
+      
 
 # General
 ```
