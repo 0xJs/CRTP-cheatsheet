@@ -29,10 +29,15 @@
       
 
 # General
+#### Access C disk of a computer (check local admin)
 ```
 ls \\computername\c$
 ```
 
+#### Use this parameter to not print errors powershell
+```
+-ErrorAction SilentlyContinue
+```
 
 # Domain Enumeration
 ## Powerview Domain
