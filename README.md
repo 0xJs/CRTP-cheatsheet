@@ -26,7 +26,7 @@
       * [SecurityDescriptor - WMI](#SecurityDescriptor---WMI)
       * [SecurityDescriptor - Powershell Remoting](#SecurityDescriptor---Powershell-Remoting)
       * [SecurityDescriptor - Remote Registry](#SecurityDescriptor---Remote-Registry)
-* [Domain privilege escalation](#Domain-privilege escalation)
+* [Domain privilege escalation](#Domain-privilege-escalation)
    * [Kerberoast](#Kerberoast) 
    * [AS-REPS](#AS-REPS) 
    * [Set SPN](#Set-SPN) 
