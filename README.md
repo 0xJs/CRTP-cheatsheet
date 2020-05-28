@@ -77,6 +77,7 @@ Get-DomainSID
 #### Get the domain policy
 ```
 Get-DomainPolicy
+(Get-DomainPolicy)."System Access"
 ```
 
 ## Powerview users groups and computers
