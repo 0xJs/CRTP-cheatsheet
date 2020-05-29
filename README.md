@@ -28,7 +28,7 @@
       * [SecurityDescriptor - Remote Registry](#SecurityDescriptor---Remote-Registry)
 * [Domain privilege escalation](#Domain-privilege-escalation)
    * [Kerberoast](#Kerberoast) 
-   * [AS-REPS](#AS-REPS) 
+   * [AS-REPS Roasting](#AS-REPS-Roasting) 
    * [Set SPN](#Set-SPN) 
    * [Unconstrained Delegation](#Unconstrained-delegation) 
    * [Constrained Delegation](#Constrained-delegation) 
@@ -769,7 +769,7 @@ Crack the password for the serviceaccount
 python.exe .\tgsrepcrack.py .\10k-worst-pass.txt .\2-40a10000-student1@MSSQLSvc~dcorp-mgmt.dollarcorp.moneycorp.local-DOLLARCORP.MONEYCORP.LOCAL.kirbi
 ```
 
-## AS-REPS
+## AS-REPS Roasting
 #### Enumerating accounts with kerberos preauth disabled
 ```
 . .\Powerview_dev.ps1
