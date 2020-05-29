@@ -257,7 +257,7 @@ Invoke-ACLScanner -ResolveGUIDs
 
 #### Search of interesting ACL's for the current user
 ```
-Invoke-ACLScanner -ResolveGUIDs | ?{$_.IdentityReference -match "student244"}
+Invoke-ACLScanner | Where-Object {$_.IdentityReference –eq [System.Security.Principal.WindowsIdentity]::GetCurrent().Name}
 ```
 
 ## Powerview Domain trust
