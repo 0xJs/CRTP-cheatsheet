@@ -803,6 +803,7 @@ Hashcat -a 0 -m 18200 hash.txt rockyou.txt
 ```
 
 ## Set SPN
+With enough rights (GenericAll, GenericWrite), a target user SPN can be set to anything, but needs to be unique in the domain.
 #### Enumerate permissions for RDPusers on ACL
 ```
 Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”}
