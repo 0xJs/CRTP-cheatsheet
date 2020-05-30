@@ -253,6 +253,7 @@ Get-PathAcl -Path \\dcorp-dc.dollarcorp.moneycorp.local\sysvol
 #### Search for interesting ACL's
 ```
 Invoke-ACLScanner -ResolveGUIDs
+Invoke-ACLScanner -ResolveGUIDs | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
 ```
 
 #### Search of interesting ACL's for the current user
@@ -781,7 +782,7 @@ Get-DomainUser -PreauthNotRequired -Verbose
 #### Enumerate permissions for the RDPusers
 ```
 Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”}
-Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”} | select ObjectDN, ActiveDirectoryRights
+Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”} | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
 ```
 
 #### Request encrypted AS-REP
@@ -805,7 +806,7 @@ Hashcat -a 0 -m 18200 hash.txt rockyou.txt
 #### Enumerate permissions for RDPusers on ACL
 ```
 Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”}
-Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”} | select ObjectDN, ActiveDirectoryRights
+Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “RDPUsers”} | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
 ```
 
 #### Check if user has SPN
