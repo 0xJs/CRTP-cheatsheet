@@ -38,7 +38,7 @@
       * [Child to parent - krbtgt hash](#Child-to-parent---krbtgt-hash)
    * [Crossforest attacks](#Crossforest-attacks)
       * [Trust flow](#Trust-flow) 
-      * [Trust abuse](#Trust-abuse) 
+      * [Trust abuse SQL](#Trust-abuse-SQL) 
    
 # General
 #### Access C disk of a computer (check local admin)
@@ -962,7 +962,7 @@ Invoke-Mimikatz -Command '"Kerberos::golden /user:Administrator /domain:dollarco
 
 #### Check access to server
 ```
-Ls \\mcorp-dc.moneycorp.local\c$ 
+ls \\mcorp-dc.moneycorp.local\c$ 
 ```
 
 ### Child to parent - krbtgt hash
@@ -1017,7 +1017,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarco
 Ls \\eurocorp-dc.eurocorp.local\forestshare\
 ```
 
-### Trust abuse
+### Trust abuse SQL
 ```
 . .\PowerUpSQL.ps1
 ```
