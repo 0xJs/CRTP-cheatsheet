@@ -875,6 +875,7 @@ Invoke-Mimikatz -Command '"kerberos:ptt"' <kirbi file>
 ```
 
 ## Constrained Delegation
+Als je over een account of computer beschikt met de constrained delegation privilege is het mogelijk om je voor te doen als elk andere gebruiker en jezelf te authentiseren naar een service waar de gebruiker mag delegeren.
 ### Enumerate
 #### Enumerate users with contrained delegation enabled
 ```
@@ -921,6 +922,7 @@ Invoke-Mimikatz -Command '"lsadump::dcsync /user:<domain>\krbtgt"'
 ```
 
 ## DNS Admins
+Indien je over een gebruiker bezit die lid is van de 'DNS admin' is het mogelijk om verschillende aanvallen uit te voeren op de DNS server (Meestal Domain Controller) Het is mogelijk om hier een reverse shell mee te krijgen, maar dit legt heel het DNS verkeer plat binnen het domein aangezien dit de DNS service bezighoudt! Voor meer informatie zie [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/from-dnsadmins-to-system-to-domain-compromise]
 #### Enumerate member of the DNS admin group
 ```
 Get-NetGRoupMember “DNSAdmins”
