@@ -745,7 +745,7 @@ Get-RemoteCachedCredential -Computername <computername> -Verbose
 ```
 # Domain Privilege escalation
 ## Kerberoast
-Roast service accounts which are users and probably have passwords set manually. These might be crackable.
+Kerberoasting een technique waarbij de wachtwoorden van service accounts worden gekraakt. Kerberoasting is voornamelijk efficient indien er user accounts als service accounts worden gebruikt. Een TGS ticket kan worden aangevraagd voor deze user, waarbij de TGS versleuteld is met de NTLM hash van de plaintext wachtwoord van de gebruiker. Als de service account een user account is welke zelf is aangemaakt door de beheerder is de kans groter dat deze ticket te kraken is, en dus het wachtwoord wordt achterhaalt voor de service. Deze TGS ticket kan offline gekraakt worden. Voor de aanval word de kerberoas[https://github.com/nidem/kerberoast] repositorie van Nidem gebruikt.
 #### Find user accounts used as service accounts
 ```
 Get-NetUser -SPN
@@ -776,7 +776,7 @@ python.exe .\tgsrepcrack.py .\10k-worst-pass.txt .\2-40a10000-student1@MSSQLSvc~
 ```
 
 ## AS-REPS Roasting
-Roast user account wich don't require pre authentication
+AS-REPS roasting is een technique waarbij het wachtwoord achterhaald kan worden omdat de 'Do not require Kerberos preauthentication property' is aangezet, oftewel kerberos preauthentication staat uit. Een aanvaller kan de eerste stap van authenticatie overslaan en voor deze gebruiker een TGT aanvragen, welke vervolgens offline gekraakt kan worden.
 #### Enumerating accounts with kerberos preauth disabled
 ```
 . .\Powerview_dev.ps1
