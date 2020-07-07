@@ -821,7 +821,7 @@ Get-DomainUser -PreauthNotRequired -verbose | select samaccountname
 ```
 
 #### Enumerate permissions for group
-Met genoeg rechten(GenericWrite of GenericAll) is het mogelijk om kerberos preauth uitgeschakelt worden.
+Met genoeg rechten(GenericWrite of GenericAll) is het mogelijk om kerberos preauth in te schakelen.
 ```
 Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>”}
 Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>”} | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
