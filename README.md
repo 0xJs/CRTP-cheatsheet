@@ -816,6 +816,9 @@ AS-REPS roasting is een technique waarbij het wachtwoord achterhaald kan worden 
 . .\Powerview_dev.ps1
 Get-DomainUser -PreauthNotRequired -Verbose
 ```
+```
+Get-DomainUser -PreauthNotRequired -verbose | select samaccountname
+```
 
 #### Enumerate permissions for group
 Met genoeg rechten(GenericWrite of GenericAll) is het mogelijk om kerberos preauth uitgeschakelt worden.
