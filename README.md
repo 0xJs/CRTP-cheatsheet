@@ -83,6 +83,7 @@ Get-DomainPolicy
 #### Get Information of domain controller
 ```
 Get-NetDomainController
+Get-NetDomainController | select-object Name
 ```
 
 #### Get information of users in the domain
