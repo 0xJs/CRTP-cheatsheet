@@ -908,6 +908,7 @@ Domain Controllers always show up, ignore them
 ```
  . .\PowerView_dev.ps1
 Get-Netcomputer -UnConstrained
+Get-Netcomputer -UnConstrained | select samaccountname
 ```
 
 #### Check if any DA tokens are available on the unconstrained machine
