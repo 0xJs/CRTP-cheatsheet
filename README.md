@@ -784,7 +784,9 @@ Kerberoasting een technique waarbij de wachtwoorden van service accounts worden 
 ```
 Get-NetUser -SPN
 ```
-
+```
+Get-NetUser -SPN | select samaccountname,serviceprincipalname
+```
 
 #### Reguest a TGS
 ```
