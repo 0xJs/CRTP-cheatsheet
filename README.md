@@ -943,7 +943,7 @@ Get-Domaincomputer -TrustedToAuth
 #### Requesting TGT with kekeo
 ```
 ./kekeo.exe
-Tgt::ask /user:websvc /domain:<domain> /rc4:<hash>
+Tgt::ask /user:<username> /domain:<domain> /rc4:<hash>
 ```
 
 #### Requesting TGS with kekeo
