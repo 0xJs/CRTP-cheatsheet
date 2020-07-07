@@ -779,11 +779,12 @@ Get-RemoteCachedCredential -Computername <computername> -Verbose
 Kerberoasting een technique waarbij de wachtwoorden van service accounts worden gekraakt. Kerberoasting is voornamelijk efficient indien er user accounts als service accounts worden gebruikt. Een TGS ticket kan worden aangevraagd voor deze user, waarbij de TGS versleuteld is met de NTLM hash van de plaintext wachtwoord van de gebruiker. Als de service account een user account is welke zelf is aangemaakt door de beheerder is de kans groter dat deze ticket te kraken is, en dus het wachtwoord wordt achterhaalt voor de service. Deze TGS ticket kan offline gekraakt worden. Voor de aanval word de kerberoas[https://github.com/nidem/kerberoast] repositorie van Nidem gebruikt.
 #### Find user accounts used as service accounts
 ```
-Get-NetUser -SPN
-```
-```
 . ./GetUserSPNs.ps1
 ```
+```
+Get-NetUser -SPN
+```
+
 
 #### Reguest a TGS
 ```
