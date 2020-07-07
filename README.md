@@ -823,8 +823,8 @@ Get-DomainUser -PreauthNotRequired -verbose | select samaccountname
 #### Enumerate permissions for group
 Met genoeg rechten(GenericWrite of GenericAll) is het mogelijk om kerberos preauth uit te schakelen.
 ```
-Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>”}
-Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>”} | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
+Invoke-ACLScanner -ResolveGUIDS | Where-Object {$_.IdentityReference -match “<groupname>”}
+Invoke-ACLScanner -ResolveGUIDS | Where-Object {$_.IdentityReference -match “<groupname>”} | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
 ```
 
 #### Set preauth not required
@@ -855,8 +855,8 @@ Met genoeg rechten (GenericALL en GenericWrite) is het mogelijk om zelf de Servi
 
 #### Enumerate permissions for group on ACL
 ```
-Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>”}
-Invoke-ACLScanner -ResolveGUIDS | ?{$_.IdentityReference -match “<groupname>”} | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
+Invoke-ACLScanner -ResolveGUIDS | Where-Object {$_.IdentityReference -match “<groupname>”}
+Invoke-ACLScanner -ResolveGUIDS | Where-Object {$_.IdentityReference -match “<groupname>”} | select IdentityReference, ObjectDN, ActiveDirectoryRights | fl
 ```
 
 #### Check if user has SPN
