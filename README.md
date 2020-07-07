@@ -933,11 +933,13 @@ Als je over een account of computer beschikt met de constrained delegation privi
 #### Enumerate users with contrained delegation enabled
 ```
 Get-DomainUser -TrustedToAuth
+Get-DomainUser -TrustedToAuth | select samaccountname, msds-allowedtodelegateto
 ```
 
 #### Enumerate computers with contrained delegation enabled
 ```
 Get-Domaincomputer -TrustedToAuth
+Get-Domaincomputer -TrustedToAuth | select samaccountname, msds-allowedtodelegateto
 ```
 ### Constrained delegation User
 #### Requesting TGT with kekeo
