@@ -51,6 +51,11 @@ ls \\<computername>\c$
 -ErrorAction SilentlyContinue
 ```
 
+#### Rename powershell windows
+```
+$host.ui.RawUI.WindowTitle = "<naam>"
+```
+
 # Domain Enumeration
 ## Powerview Domain
 https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
