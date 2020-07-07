@@ -906,6 +906,7 @@ Unconstrained delegation is een privilege welke kan worden toegekent aan gebruik
 #### Discover domain computers which have unconstrained delegation
 Domain Controllers always show up, ignore them
 ```
+ . .\PowerView_dev.ps1
 Get-Netcomputer -UnConstrained
 ```
 
