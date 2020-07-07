@@ -116,6 +116,7 @@ get-userproperty -Properties pwdlastset
 #### Get descripton field from the user
 ```
 Find-UserField -SearchField Description -SearchTerm "built"
+Get-netuser | Select-Object samaccountname,description
 ```
 
 #### Get computer information
