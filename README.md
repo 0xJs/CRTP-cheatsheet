@@ -78,10 +78,11 @@ Get-NetDomain -Domain <domainname>
 Get-DomainSID
 ```
 
-#### Get the domain policy
+#### Get the domain password policy
 ```
 Get-DomainPolicy
 (Get-DomainPolicy)."System Access"
+net accounts
 ```
 
 ## Powerview users groups and computers
