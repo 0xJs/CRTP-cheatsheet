@@ -33,12 +33,13 @@
    * [Unconstrained Delegation](#Unconstrained-delegation) 
    * [Constrained Delegation](#Constrained-delegation) 
    * [DNS Admins](#DNS-Admins) 
+   * [Abuse SQL](#Abuse-SQL) 
    * [Enterprise Admins](#Enterprise-Admins) 
       * [Child to parent - Trust tickets](#Child-to-parent---Trust-tickets)
       * [Child to parent - krbtgt hash](#Child-to-parent---krbtgt-hash)
    * [Crossforest attacks](#Crossforest-attacks)
       * [Trust flow](#Trust-flow) 
-      * [Trust abuse SQL](#Trust-abuse-SQL) 
+      
    
 # General
 #### Access C disk of a computer (check local admin)
@@ -1096,7 +1097,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<domain>
 ls \\<servername>\<share>\
 ```
 
-### Trust abuse SQL
+### Abuse SQL
 ```
 . .\PowerUpSQL.ps1
 ```
